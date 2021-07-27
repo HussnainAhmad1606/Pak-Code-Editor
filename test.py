@@ -1,10 +1,79 @@
 from tkinter import *
+from tkinter.messagebox import showinfo
+from tkinter.filedialog import asksaveasfilename, askopenfilename, askdirectory
 
+import os
+import webbrowser
 # Functions Start Here
+
+# Visit website function
+def openWebsite():
+	website = "https://hussnainahmad.com"
+	webbrowser.open(website)
+
+
+# Contribution function
+def contribution():
+	contribute_page = "https://github.com/HussnainAhmad1606/Pak-Code-Editor"
+	webbrowser.open(contribute_page)
+
+
+# About function
+def about():
+	showinfo("Pak Code Editor", "A Code editor made for Pakistani Developers by a Pakistani Developer")
+
+def submitFeedback():
+	webbrowser.open("https://hussnainahmad.com")
+
+def submitBugReport():
+	webbrowser.open("https://hussnainahmad.com")
+
+
+# copy function
+def copy():
+	codingArea.event_generate("<<Copy>>")
+
+def cut():
+	codingArea.event_generate("<<Cut>>")
+
+def paste():
+	codingArea.event_generate("<<Paste>>")
+
+def undo():
+	codingArea.event_generate("<<Undo>>")
+	print("Undo")
 
 # Create new file function
 def newFile():
-	pass
+	global file
+	root.title("Untitled - Pak Code Editor")
+	codingArea.delete(1.0, END)
+	file = None
+
+def openFile():
+	global file
+	file = askopenfilename(defaultextension=".txt", filetypes=[("All Files", "*.*"),("Python Files", "*.py")])
+	if file == "":
+		file = None
+	else:
+		root.title(os.path.basename(file) + " - Pak Code Editor")
+		f = open(file, "r")
+		codingArea.delete(1.0, END)
+		codingArea.insert(1.0, f.read())
+		f.close()
+
+
+def openFolder():
+	folder = askdirectory()
+	root.title(os.path.basename(folder) + " - Pak Code Editor")
+	foldersInFolder = os.listdir(folder)
+	print(foldersInFolder)
+	folderStr = ""
+	for singleFolder in foldersInFolder:
+		folderStr = folderStr + singleFolder + "\n"
+	print(folderStr)
+	folders["text"] = folderStr
+
 
 
 def removeLine(event):
@@ -39,7 +108,7 @@ def addLine(event):
 
 if __name__ == "__main__":
 	root = Tk()
-
+	file = None
 	# Title of the software
 	root.title("Pak Text Editor")
 
@@ -62,7 +131,9 @@ if __name__ == "__main__":
 	# File Menu
 	fileMenu = Menu(mainMenu, tearoff=0)
 	fileMenu.add_command(label="New File", command=newFile)
-	fileMenu.add_command(label="Open File", command=newFile)
+	fileMenu.add_command(label="Open File", command=openFile)
+	fileMenu.add_separator()
+	fileMenu.add_command(label="Open Folder", command=openFolder)
 	fileMenu.add_separator()
 	fileMenu.add_command(label="Save", command=newFile)
 	fileMenu.add_separator()
@@ -73,12 +144,12 @@ if __name__ == "__main__":
 
 	# Edit Menu
 	editMenu = Menu(mainMenu, tearoff=0)
-	editMenu.add_command(label="Undo", command=newFile)
+	editMenu.add_command(label="Undo", command=undo)
 	editMenu.add_command(label="Redo", command=newFile)
 	editMenu.add_separator()
-	editMenu.add_command(label="Cut", command=newFile)
-	editMenu.add_command(label="Copy", command=newFile)
-	editMenu.add_command(label="Paste", command=newFile)
+	editMenu.add_command(label="Cut", command=cut)
+	editMenu.add_command(label="Copy", command=copy)
+	editMenu.add_command(label="Paste", command=paste)
 
 
 	mainMenu.add_cascade(label="Edit", menu=editMenu)
@@ -106,13 +177,16 @@ if __name__ == "__main__":
 
 	# Edit Menu
 	editMenu = Menu(mainMenu, tearoff=0)
-	editMenu.add_command(label="Visit Website", command=newFile)
-	editMenu.add_command(label="Contribute", command=newFile)
+	editMenu.add_command(label="Visit Website", command=openWebsite)
+	editMenu.add_command(label="Contribute", command=contribution)
 	editMenu.add_separator()
 	editMenu.add_command(label="Purchase License", command=newFile)
 	editMenu.add_command(label="Enter License", command=newFile)
 	editMenu.add_separator()
-	editMenu.add_command(label="About Pak Text", command=newFile)
+	editMenu.add_command(label="Submit a Feedback", command=submitFeedback)
+	editMenu.add_command(label="Submit a Bug Report", command=submitBugReport)
+	editMenu.add_separator()
+	editMenu.add_command(label="About Pak Text", command=about)
 
 	mainMenu.add_cascade(label="Help", menu=editMenu)
 	root.config(menu=mainMenu)
@@ -125,8 +199,8 @@ if __name__ == "__main__":
 	sideBarFrame = Frame(root, padx=40)
 	sideBarFrame.pack(fill=BOTH, side=LEFT)
 
-	label = Label(sideBarFrame, text="Folders", font=("Berlin Sans FB", 30))
-	label.pack()
+	folders = Label(sideBarFrame, text="Folders", font=("Berlin Sans FB", 30))
+	folders.pack()
 
 	# Line Numbers to show
 	lineNumbers = Text(root, width=5, bg="blue", font=("Cascadia Code", 20))
