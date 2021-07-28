@@ -96,6 +96,14 @@ def saveFile():
 		f.write(codingArea.get(1.0, END))
 		f.close()
 
+def saveAsFile():
+	global file
+	file = asksaveasfilename(initialfile='Untitled.txt', defaultextension=".txt", filetypes=[("All Files", "*.*"),("Text Documents", "*.txt")])
+
+	# Save the file
+	f = open(file, "w")
+	f.write(codingArea.get(1.0, END))
+	f.close()
 
 def removeLine(event):
 	if codingArea.get(1.0, END) == "":
@@ -116,6 +124,7 @@ def removeLine(event):
 		lineNumbers.insert(1.0, line_numbers_string)
 		lineNumbers.configure(state='disabled')
 
+# Add line number upon clicking ENTER
 def addLine(event):
 	final_index = str(lineNumbers.index(END))
 	num_of_lines = final_index.split(".")[0]
@@ -126,7 +135,35 @@ def addLine(event):
 	lineNumbers.insert(1.0, line_numbers_string)
 	lineNumbers.configure(state='disabled')
 
+# Increase font by 2 points
+def increaseFont():
+	global fontSize
+	fontSize += 2
+	codingArea.configure(font=("Cascadia Code", fontSize))
+	lineNumbers.configure(font=("Cascadia Code", fontSize))
 
+
+# Decrease font by 2 points
+def decreaseFont():
+	global fontSize
+	fontSize -= 2
+	codingArea.configure(font=("Cascadia Code", fontSize))
+	lineNumbers.configure(font=("Cascadia Code", fontSize))
+
+# Reset font back to 20 points
+def resetFont():
+	global fontSize
+	fontSize  = 20
+	codingArea.configure(font=("Cascadia Code", fontSize))
+	lineNumbers.configure(font=("Cascadia Code", fontSize))
+
+
+# Settings window function
+def settings():
+	settings = Tk()
+	settings.title("Settings - Pak Code Editor")
+	settings.geometry("400x400")
+	settings.mainloop()
 if __name__ == "__main__":
 	root = Tk()
 	file = None
@@ -152,11 +189,14 @@ if __name__ == "__main__":
 	# File Menu
 	fileMenu = Menu(mainMenu, tearoff=0)
 	fileMenu.add_command(label="New File", command=newFile)
-	fileMenu.add_command(label="Open File", command=openFile)
 	fileMenu.add_separator()
+	fileMenu.add_command(label="Open File", command=openFile)
 	fileMenu.add_command(label="Open Folder", command=openFolder)
 	fileMenu.add_separator()
 	fileMenu.add_command(label="Save", command=saveFile)
+	fileMenu.add_command(label="Save As..", command=saveAsFile)
+	fileMenu.add_separator()
+	fileMenu.add_command(label="Close File", command=saveFile)
 	fileMenu.add_separator()
 	fileMenu.add_command(label="Exit", command=root.destroy)
 
@@ -171,22 +211,24 @@ if __name__ == "__main__":
 	editMenu.add_command(label="Cut", command=cut)
 	editMenu.add_command(label="Copy", command=copy)
 	editMenu.add_command(label="Paste", command=paste)
-
+	editMenu.add_separator()
+	editMenu.add_command(label="Find", command=newFile)
+	editMenu.add_command(label="Replace", command=newFile)
 	mainMenu.add_cascade(label="Edit", menu=editMenu)
 	root.config(menu=mainMenu)
 
 	# Preferences Menu
 	preferMenu = Menu(mainMenu, tearoff=0)
-	preferMenu.add_command(label="Settings", command=newFile)
+	preferMenu.add_command(label="Settings", command=settings)
 	preferMenu.add_separator()
 	preferMenu.add_command(label="Theme...", command=newFile)
 
 	# Font menu within preferences menu
 	fontMenu = Menu(preferMenu, tearoff=0)
-	fontMenu.add_command(label="Smaller", command=newFile)
-	fontMenu.add_command(label="Larger", command=newFile)
+	fontMenu.add_command(label="Smaller", command=decreaseFont)
+	fontMenu.add_command(label="Larger", command=increaseFont)
 	fontMenu.add_separator()
-	fontMenu.add_command(label="Reset", command=newFile)
+	fontMenu.add_command(label="Reset", command=resetFont)
 
 
 	preferMenu.add_cascade(label="Font", menu=fontMenu)
@@ -223,25 +265,33 @@ if __name__ == "__main__":
 	folders.pack()
 
 	# Coding area scroll bar
-	codingScroll = Scrollbar(root)
-	codingScroll.pack(fill=BOTH, side=RIGHT)
-
+	# codingScroll = Scrollbar(root)
+	# codingScroll.pack(fill=BOTH, side=RIGHT)
+	fontSize = 20
 	# Line Numbers to show
-	lineNumbers = Text(root, width=5, font=("Cascadia Code", 20), bg="#476072", fg="white", yscrollcommand=codingScroll.set)
+	lineNumbers = Text(root, width=1, font=("Cascadia Code", fontSize), bg="#476072", fg="white")
 	lineNumbers.pack(side=LEFT, fill=BOTH)
 	lineNumbers.insert("1.0", "1")
 
 	lineNumbers['state'] = 'disabled'
 
 
+	def multiple_yview(*args):
+		lineNumbers.yview(*args)
+		codingArea.yview(*args)
+
 
 
 	# Text Area where code will be written
-	codingArea = Text(root, font=("Cascadia Code", 20), bg="#548CA8", fg="white", cursor="xterm white white", yscrollcommand=codingScroll.set)
+	
+	codingArea = Text(root, font=("Cascadia Code", fontSize), bg="#548CA8", fg="white", cursor="xterm white white")
 	codingArea.pack(expand=True, fill=BOTH)
 	codingArea.config(insertbackground="white")
 
-	codingScroll.config(command= codingArea.yview)
+	scrollbar = Scrollbar(codingArea, orient=VERTICAL, cursor="arrow", command=multiple_yview)
+	scrollbar.pack(fill=Y, side=RIGHT)
+
+	# codingScroll.config(command= codingArea.yview)
 
 
 
