@@ -1,5 +1,6 @@
 from tkinter import *
 from tkinter.messagebox import showinfo
+from PIL import Image, ImageTk
 from tkinter.filedialog import asksaveasfilename, askopenfilename, askdirectory
 
 import os
@@ -70,10 +71,30 @@ def openFolder():
 	print(foldersInFolder)
 	folderStr = ""
 	for singleFolder in foldersInFolder:
+		Label(sideBarFrame, text=singleFolder, font=("Berlin Sans FB", 20)).pack()
 		folderStr = folderStr + singleFolder + "\n"
 	print(folderStr)
-	folders["text"] = folderStr
+	# folders["text"] = folderStr
 
+def saveFile():
+	global file
+	if file == None:
+		file = asksaveasfilename(initialfile='Untitled.txt', defaultextension=".txt", filetypes=[("All Files", "*.*"),("Text Documents", "*.txt")])
+		if file == "":
+			file = None
+
+		else:
+			# Save as a new file
+			f = open(file, "w")
+			f.write(codingArea.get(1.0, END))
+			f.close()
+
+			root.title(os.path.basename(file) + " - Notepad")
+	else:
+		# Save the file
+		f = open(file, "w")
+		f.write(codingArea.get(1.0, END))
+		f.close()
 
 
 def removeLine(event):
@@ -135,7 +156,7 @@ if __name__ == "__main__":
 	fileMenu.add_separator()
 	fileMenu.add_command(label="Open Folder", command=openFolder)
 	fileMenu.add_separator()
-	fileMenu.add_command(label="Save", command=newFile)
+	fileMenu.add_command(label="Save", command=saveFile)
 	fileMenu.add_separator()
 	fileMenu.add_command(label="Exit", command=root.destroy)
 
@@ -150,7 +171,6 @@ if __name__ == "__main__":
 	editMenu.add_command(label="Cut", command=cut)
 	editMenu.add_command(label="Copy", command=copy)
 	editMenu.add_command(label="Paste", command=paste)
-
 
 	mainMenu.add_cascade(label="Edit", menu=editMenu)
 	root.config(menu=mainMenu)
@@ -195,23 +215,38 @@ if __name__ == "__main__":
 	Menu Ends Here
 	"""
 
-	# Side bar where files of the project will be shown
-	sideBarFrame = Frame(root, padx=40)
-	sideBarFrame.pack(fill=BOTH, side=LEFT)
 
-	folders = Label(sideBarFrame, text="Folders", font=("Berlin Sans FB", 30))
+	# Side bar where files of the project will be shown
+	sideBarFrame = Canvas(root)
+	sideBarFrame.pack(fill=BOTH, side=LEFT)
+	folders = Label(sideBarFrame, text="Folders", font=("Berlin Sans FB", 20))
 	folders.pack()
 
+	# Coding area scroll bar
+	codingScroll = Scrollbar(root)
+	codingScroll.pack(fill=BOTH, side=RIGHT)
+
 	# Line Numbers to show
-	lineNumbers = Text(root, width=5, bg="blue", font=("Cascadia Code", 20))
+	lineNumbers = Text(root, width=5, font=("Cascadia Code", 20), bg="#476072", fg="white", yscrollcommand=codingScroll.set)
 	lineNumbers.pack(side=LEFT, fill=BOTH)
 	lineNumbers.insert("1.0", "1")
 
 	lineNumbers['state'] = 'disabled'
-	
+
+
+
+
 	# Text Area where code will be written
-	codingArea = Text(root, font=("Cascadia Code", 20))
+	codingArea = Text(root, font=("Cascadia Code", 20), bg="#548CA8", fg="white", cursor="xterm white white", yscrollcommand=codingScroll.set)
 	codingArea.pack(expand=True, fill=BOTH)
+	codingArea.config(insertbackground="white")
+
+	codingScroll.config(command= codingArea.yview)
+
+
+
+
+
 
 	root.bind("<Return>", addLine)
 	root.bind("<BackSpace>", removeLine)
